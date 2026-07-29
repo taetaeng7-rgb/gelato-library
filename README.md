@@ -1,0 +1,49 @@
+# 젤라토 서재
+
+GitHub Pages에서 동작하는 모바일 우선 전자책 앱입니다. 평문 원고는 비공개
+`gelato-content` 저장소에서 관리하고, 이 공개 저장소에는 앱과 `GELATOE2`
+암호문만 둡니다.
+
+## 로컬 확인
+
+```bash
+npm test
+npm run guard
+python3 -m http.server 8080
+```
+
+브라우저에서 `http://localhost:8080/`을 엽니다. `file://`로 직접 열면
+Web Crypto와 서비스 워커의 보안 컨텍스트 조건을 만족하지 못합니다.
+
+## 설치와 오프라인 읽기
+
+Pages 주소를 Safari 또는 Chrome에서 연 뒤 **홈 화면에 추가**하면 앱처럼
+실행할 수 있습니다. 각 자료 화면의 **자료와 검색 함께 저장**은 선택한
+본문과 해당 책의 검색색인을 암호문 그대로 기기에 저장합니다. 비밀번호와
+복호화된 본문은 저장하지 않으며, 콘텐츠 빌드가 바뀌면 이전 암호문 캐시는
+새 catalog salt를 기준으로 분리됩니다. 새 오프라인 세트는 staging cache에서
+전부 검증된 뒤 한 번에 활성화되므로 다운로드나 검증이 실패해도 기존 세트는
+유지됩니다. 앱 업데이트가 제어권을 얻으면 구·신 파일 혼용을 막기 위해 화면이
+한 번 새로고침될 수 있습니다.
+
+## 공개 저장소 규칙
+
+- `data/`에는 `.enc` 번들과 빌드 검증용 `manifest.json`,
+  `.gelato-output`만 둡니다.
+- 비밀번호, GitHub 토큰, 평문 Markdown, PDF, `.env`는 커밋하지 않습니다.
+- 평문 문서는 명시된 allowlist의 `README.md`만 허용합니다.
+- 번들 생성은 비공개 저장소에서 실행합니다.
+- `npm run check`가 통과한 뒤 Pages에 배포합니다.
+
+Pages 설정은 저장소의 **Settings → Pages → Deploy from a branch**에서
+`main` 브랜치와 `/ (root)`를 선택합니다. 앱은 hash routing을 사용하므로
+프로젝트 Pages 하위 경로에서도 새로고침할 수 있습니다.
+
+## 보안 경계
+
+HTML의 CSP는 스크립트·스타일·연결 대상을 이 저장소로 제한하지만,
+GitHub Pages의 정적 파일만으로는 `Content-Security-Policy:
+frame-ancestors`나 `Permissions-Policy` 같은 응답 헤더를 추가할 수
+없습니다. 따라서 이 배포 방식은 HTTP 헤더 기반 클릭재킹 방지와 기능
+권한 정책을 제공한다고 주장하지 않습니다. 해당 통제가 필요하면 응답
+헤더를 설정할 수 있는 호스팅 계층이나 프록시를 앞에 두어야 합니다.

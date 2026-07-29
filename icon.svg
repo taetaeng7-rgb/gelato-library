@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">젤라토 서재</title>
+  <rect width="512" height="512" rx="112" fill="#183a35"/>
+  <path d="M121 137c0-18 15-33 33-33h204c18 0 33 15 33 33v238c0 18-15 33-33 33H154c-18 0-33-15-33-33z" fill="#f7f2e8"/>
+  <path d="M256 104v304M153 150h65M153 194h65M294 150h65M294 194h65" fill="none" stroke="#d57b51" stroke-width="19" stroke-linecap="round"/>
+  <circle cx="256" cy="281" r="58" fill="#d57b51"/>
+  <path d="M221 282c19-31 51-37 74-10-3 30-19 50-41 50-19 0-31-13-33-40z" fill="#f7dba4"/>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "name": "gelato-library",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "guard": "node tools/guard.mjs",
+    "check": "npm run test && npm run guard"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
