@@ -7,218 +7,218 @@
     {
       "path": "books/corvitto/chapters/01.enc",
       "bundleId": "corvitto:chapter:01",
-      "bytes": 70323,
-      "sha256": "1828e95001eba51a51b5e7a9e7c2a9d2ad1d8f24550a5252fc79f3d8b1516ba8"
+      "bytes": 70246,
+      "sha256": "0c0c9942081e31e7d409bf2537d4a9580b52226400cd621b93092817dd807132"
     },
     {
       "path": "books/corvitto/chapters/02.enc",
       "bundleId": "corvitto:chapter:02",
-      "bytes": 27834,
-      "sha256": "40c2c3075cf942ce81474898ea3eaf48f1147acb33407c7ce5651598e7bfd1c1"
+      "bytes": 21739,
+      "sha256": "a010a8086180b0bd63c535f82b4beedb8c9f417ec00ab90013d9460c660480d9"
     },
     {
       "path": "books/corvitto/chapters/03.enc",
       "bundleId": "corvitto:chapter:03",
-      "bytes": 35755,
-      "sha256": "9f130cb0082f3f1b66d76fc47e51530c59bfc1d5bfb3e50908a0320f45795d44"
+      "bytes": 28609,
+      "sha256": "fc1108c255c6b407cee384a2602f60433d5ab24e0b52cc6cf8a2a93056568d2d"
     },
     {
       "path": "books/corvitto/chapters/04.enc",
       "bundleId": "corvitto:chapter:04",
-      "bytes": 18658,
-      "sha256": "e2414d6485c5024616e1af30e4e83fe60ea2215fa6a8ad449a7d8ecad6342de6"
+      "bytes": 18473,
+      "sha256": "18664c3fab2e4ec9a2a8fb82555ae886d19638b7377ddd486e0b424a23af9594"
     },
     {
       "path": "books/corvitto/chapters/05.enc",
       "bundleId": "corvitto:chapter:05",
-      "bytes": 48326,
-      "sha256": "cc18df714e299f98e5a5cd6df4fcbbda50702573f27fe705e6e35ad80e63fcc2"
+      "bytes": 42833,
+      "sha256": "7149349dc200fc630eac67098cf93e3941d85d074b3097f03b2c80299a4d643c"
     },
     {
       "path": "books/corvitto/chapters/06.enc",
       "bundleId": "corvitto:chapter:06",
-      "bytes": 46360,
-      "sha256": "e844a7844e01028b64ffcff953a81f9afa337d0450f0eed047aedc449c03d168"
+      "bytes": 41510,
+      "sha256": "b9875f5089ae1404a46aec5a0d19a9549722e063aaa4d2504c21adc761fb9689"
     },
     {
       "path": "books/corvitto/chapters/07.enc",
       "bundleId": "corvitto:chapter:07",
-      "bytes": 33706,
-      "sha256": "e9091f214fcbda794416073e64b41e9a83d237e11605d3d7f1dce4a3d464cd18"
+      "bytes": 33490,
+      "sha256": "a2250f18901cde23c630c17ebc438fa5dadc61a39c28373e6f66281e48a3348a"
     },
     {
       "path": "books/corvitto/chapters/08.enc",
       "bundleId": "corvitto:chapter:08",
-      "bytes": 50252,
-      "sha256": "1e000c029a0cc797c20673212d90ea5ead9be42d4a365edd6b71d4bcc36a30fa"
+      "bytes": 43126,
+      "sha256": "aabd95ed2b27e8041bf9d6fa888d8c7f2bca0cfa373374f2eccb64cee41c0492"
     },
     {
       "path": "books/corvitto/chapters/09.enc",
       "bundleId": "corvitto:chapter:09",
-      "bytes": 95538,
-      "sha256": "112e9cdec8622c2ece6b17270092844dde98f7f46ad08dff8159fd7067ad6eb4"
+      "bytes": 84143,
+      "sha256": "34816149f173a51214d0d00a99509ae87fd96d472620f0a9160738b7b69d8936"
     },
     {
       "path": "books/corvitto/chapters/10.enc",
       "bundleId": "corvitto:chapter:10",
-      "bytes": 129665,
-      "sha256": "2ec85d5abbd6aa7f2433a27546038834a541f3b320084ec7b6965b2d1bed598d"
+      "bytes": 116037,
+      "sha256": "da1622409daf48f13e58ac77c2b3e0566a100b2b491200bff08055ed0adf3c9d"
     },
     {
       "path": "books/corvitto/chapters/11.enc",
       "bundleId": "corvitto:chapter:11",
-      "bytes": 112033,
-      "sha256": "c4fcbbc0f7ffcd5bfb3ef54ef1c27e25093426a373892452727d0de0507dc226"
+      "bytes": 104777,
+      "sha256": "f216e7420c968475c442c7b3840cf7ea34eec9a9c152534acb9cefd30d559720"
     },
     {
       "path": "books/corvitto/chapters/12.enc",
       "bundleId": "corvitto:chapter:12",
-      "bytes": 94721,
-      "sha256": "fd3dbed9fc4c02fe5ad2e9ec96bf22daa88fa46eef9be578f7ecff1e98985347"
+      "bytes": 77828,
+      "sha256": "463ed7e65df2449a2ae18c107370def0e04c1a4e93ba22d1a2bebea9795b920f"
     },
     {
       "path": "books/corvitto/chapters/13.enc",
       "bundleId": "corvitto:chapter:13",
-      "bytes": 61226,
-      "sha256": "baf5522d79904e60e8d912711c4aefdd5b5de0d0e4f8377520e402887405b592"
+      "bytes": 52732,
+      "sha256": "1e7859aa4e51521627d57b570ff546221a597bea91e03e79d0ec49eb7ce85ed8"
     },
     {
       "path": "books/corvitto/chapters/14.enc",
       "bundleId": "corvitto:chapter:14",
-      "bytes": 118998,
-      "sha256": "5e1576c7d158b0f729e763b340ed8c078a873c323e1483ba975bd3745be6b1ae"
+      "bytes": 97524,
+      "sha256": "99f30bfc53056de53eac6e4ffe49800097fecd953aeed30480b8863d0777780b"
     },
     {
       "path": "books/corvitto/chapters/15.enc",
       "bundleId": "corvitto:chapter:15",
-      "bytes": 37566,
-      "sha256": "7af2117a8a0d77340787143f12aa30aa26e84cccdd8e177a7cc031553ff02c24"
+      "bytes": 37470,
+      "sha256": "2ba878ef722b009036b5fea8dce9f0ac8cc0e24a3805e004cea9825c63c57e67"
     },
     {
       "path": "books/corvitto/chapters/16.enc",
       "bundleId": "corvitto:chapter:16",
-      "bytes": 36815,
-      "sha256": "ba4d5c31ea9feabcfb687e7f45583de8fa292fa99cc932016f96546fafa0dda9"
+      "bytes": 28636,
+      "sha256": "641d139374843e514c32a73332a74cbcaf28560e038b67a8dfe7509802993b7c"
     },
     {
       "path": "books/goff/chapters/01.enc",
       "bundleId": "goff:chapter:01",
       "bytes": 65049,
-      "sha256": "7a93ef7c19027f3386c272555fa7b36ba9299a789f0f9c30921849cb87713bae"
+      "sha256": "fb2dd6c91f159e1302bca495d60e585d76526b192302c84add08e5b5c9a2ccd5"
     },
     {
       "path": "books/goff/chapters/02.enc",
       "bundleId": "goff:chapter:02",
       "bytes": 100211,
-      "sha256": "f875e654ac8937968e0a9beb2663725c44def6e87904a80df72556a8d3c4ff19"
+      "sha256": "2da9d15e9919bb92f102bde37796d77db7ee03ac81d460b6016b34b98e52e779"
     },
     {
       "path": "books/goff/chapters/03.enc",
       "bundleId": "goff:chapter:03",
       "bytes": 162350,
-      "sha256": "94563741f103c7414c859766db859715cfd977e4c3d65fcbd3fcc195224feb10"
+      "sha256": "218de85f1f8349ccc8356611b65178fd69ce5f26166cbd301b95e916a3483379"
     },
     {
       "path": "books/goff/chapters/04.enc",
       "bundleId": "goff:chapter:04",
       "bytes": 119265,
-      "sha256": "7eee8b7cf91e62691f625638d2b70a5b8391e8bb3fd6406f1bf66cfbb67a77fd"
+      "sha256": "dc11e146c4c6c2888f03aa5a3f154a1981e2dbe2beeaae1e35b3a55cc4b0ba41"
     },
     {
       "path": "books/goff/chapters/05.enc",
       "bundleId": "goff:chapter:05",
       "bytes": 106901,
-      "sha256": "59ec988435bef4915b97154b2e4fd1df80f9bea00b2fad3f2987e5b793c12c67"
+      "sha256": "67f0a009c562153aad2d6aa8c64fd9de3e7e9300d672f5d05a9a43357b91d6d1"
     },
     {
       "path": "books/goff/chapters/06.enc",
       "bundleId": "goff:chapter:06",
       "bytes": 114981,
-      "sha256": "256add602ee18bcd61400ea29f61c8ffcb3852ca672c84b9d181d57425c2c779"
+      "sha256": "4dc049159376cc554ede5560f1fbdb06c893789a06abba16bac852f181b6d60d"
     },
     {
       "path": "books/goff/chapters/07.enc",
       "bundleId": "goff:chapter:07",
       "bytes": 156720,
-      "sha256": "61775548ad2db91f6c2792f9af22698ac5462b1b5c59e051f6542da48ca2e32a"
+      "sha256": "fcd332d950edecf8f0d09dcc72b8cdb9c0d2fcf5d31d7686cfa3c7108ffd4890"
     },
     {
       "path": "books/goff/chapters/08.enc",
       "bundleId": "goff:chapter:08",
       "bytes": 34395,
-      "sha256": "f67285f5c4f2a7a88413e836590c31cd28f00daca77303407dca8c09600ebadd"
+      "sha256": "529f997a7cb683165e4aad3335da7668cba102865d2cb5a6a6ddab70d660839c"
     },
     {
       "path": "books/goff/chapters/09.enc",
       "bundleId": "goff:chapter:09",
       "bytes": 66462,
-      "sha256": "06b1ae1a77434440a92759b71f0f1cb1d5301ab0008a260e57f79587f8ae1437"
+      "sha256": "c9ebd3528760cfafde71c31bda36af95a79fc1f4ece62c58d2c519ef7fb10059"
     },
     {
       "path": "books/goff/chapters/10.enc",
       "bundleId": "goff:chapter:10",
       "bytes": 63908,
-      "sha256": "bb4b4ddc6183ccf526997efd3fd3cb16e5fb9f3291d2715f4630bae156573f7f"
+      "sha256": "24fa390bfdd0a123973ba5aaf27cf11419b6833553408c5492006d08267c6807"
     },
     {
       "path": "books/goff/chapters/11.enc",
       "bundleId": "goff:chapter:11",
       "bytes": 134789,
-      "sha256": "de583d433cb4ffa2db98455fd0cf73e31a5e8bbed6eafccb4a323ae13bb78801"
+      "sha256": "a7928a3391dd20ec3fbf987df804e40d20948d37d2cc07d4298e68ea60de4025"
     },
     {
       "path": "books/goff/chapters/12.enc",
       "bundleId": "goff:chapter:12",
       "bytes": 77800,
-      "sha256": "877de33a57ca65d6507657bc266f146377e6be844b0b8301efd546d545ceff84"
+      "sha256": "58649c97e6d9c3c2a6c31949289f77be4af0b677f10d50ee94d8604e35cc101d"
     },
     {
       "path": "books/goff/chapters/13.enc",
       "bundleId": "goff:chapter:13",
       "bytes": 88390,
-      "sha256": "bf775b1616b36a983ca26ddbc02e1688852784bb025f9754a53be47b11d292d1"
+      "sha256": "a0946e4377bf87f094a90a1e4815e01384622fba752accb530a4b6c790beab8c"
     },
     {
       "path": "books/goff/chapters/14.enc",
       "bundleId": "goff:chapter:14",
       "bytes": 115292,
-      "sha256": "82e036752858929d07dbf3a4b06eff7ac9d6f96f4b316086b8fd1c004819d28a"
+      "sha256": "5bc62ed93a86ad15bbccfe79c657014aa694805b86ce5e28dafcc7f3fd9ff1e6"
     },
     {
       "path": "books/goff/chapters/15.enc",
       "bundleId": "goff:chapter:15",
       "bytes": 63074,
-      "sha256": "c8bdbe362d6548e4077b84efeb1853ad1d6a1536bb999b71436b9252f03f1e00"
+      "sha256": "936e9ca575232d55e0a74ba0a23819bc01a236d3969646df3189e33ed395af66"
     },
     {
       "path": "books/goff/supplements/frontmatter.enc",
       "bundleId": "goff:supplement:frontmatter",
       "bytes": 31403,
-      "sha256": "ab3dfa6b15281165f85486f29c32d14d49309b1f0cf7e282ac2044409aaf8be1"
+      "sha256": "43db46f462fafb74a3ae99041a3ef7dddd002603ca1d5ba61632051d234d1a73"
     },
     {
       "path": "books/goff/supplements/index.enc",
       "bundleId": "goff:supplement:index",
       "bytes": 45087,
-      "sha256": "1a0b688ce9f2b06db81ebc2137cceb1bf4be300f1b10e800e8dcc8c73b2e6c5e"
+      "sha256": "65192b63bdc1c8b022d65c04654bcbed0d17835370ecf5a3e99168bc2a9469c6"
     },
     {
       "path": "catalog.enc",
       "bundleId": "catalog",
-      "bytes": 14370,
-      "sha256": "3a550fd0914cb8d6bfe58c05a3054cb7657eb87f5f89cf3bdc131eed7340b85f"
+      "bytes": 14366,
+      "sha256": "ccec3a684202dcf0c3697f9725e750283252500954393ee88f9a934dddbae4b5"
     },
     {
       "path": "search/corvitto.enc",
       "bundleId": "corvitto:search",
-      "bytes": 1644941,
-      "sha256": "c0ade98e79067d89100514e7c8f01f2e7fd37383c9260bceaa41cef607bbd36e"
+      "bytes": 1402579,
+      "sha256": "b0f8f48c9bd2f5c49304cd7665b19a4797d21146499821926ff7b66e9b5a7647"
     },
     {
       "path": "search/goff.enc",
       "bundleId": "goff:search",
       "bytes": 2970273,
-      "sha256": "bef200879f02d6641aac54d43721df346b1743f9abfd93b5da22860833aca6f3"
+      "sha256": "222db25b2821decb82d5f50accd5c86d2cbd89e1aad8ef043e2cca54efef5ee4"
     }
   ]
 }
