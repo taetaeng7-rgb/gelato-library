@@ -13,6 +13,7 @@ import {
   getTargetProgress,
 } from './store.js';
 import { escapeHtml } from './sanitize.js';
+import { MIN_PASSWORD_CHARACTERS } from './crypto.js';
 
 const app = document.querySelector('#app');
 const skipLink = document.querySelector('.skip-link');
@@ -108,6 +109,7 @@ function errorMessage(error) {
     UNSAFE_ITERATIONS: '안전하지 않거나 지나치게 큰 키 유도 설정입니다.',
     DECRYPT_FAILED: '비밀번호가 다르거나 파일이 손상되었습니다.',
     EMPTY_PASSWORD: '비밀번호를 입력해 주세요.',
+    PASSWORD_TOO_SHORT: `비밀번호는 ${MIN_PASSWORD_CHARACTERS}자 이상이어야 합니다.`,
     HASH_MISMATCH: '콘텐츠 무결성 검증에 실패했습니다.',
     SALT_MISMATCH: '서로 다른 암호화 세트의 파일입니다.',
     UNEXPECTED_BUNDLE: '요청한 콘텐츠와 암호화 파일이 일치하지 않습니다.',
@@ -155,10 +157,11 @@ function renderUnlock() {
         <h1 id="unlock-title">젤라토 서재 열기</h1>
         <p>비밀번호는 이 탭의 메모리에서만 사용되며 브라우저 저장소나 서버로 전송되지 않습니다.</p>
         <form id="unlock-form">
-          <label class="field-label" for="password">비밀번호</label>
+          <label class="field-label" for="password">비밀번호 (${MIN_PASSWORD_CHARACTERS}자 이상)</label>
           <div class="password-row">
             <input id="password" name="password" type="password" required autocomplete="off"
-              autocapitalize="none" spellcheck="false" aria-describedby="unlock-error">
+              minlength="${MIN_PASSWORD_CHARACTERS}" autocapitalize="none" spellcheck="false"
+              aria-describedby="unlock-error">
             <button class="secondary-button" id="password-toggle" type="button"
               aria-controls="password" aria-pressed="false">표시</button>
           </div>
@@ -192,6 +195,12 @@ function renderUnlock() {
     passwordInput.value = '';
     if (!password) {
       error.textContent = '비밀번호를 입력해 주세요.';
+      passwordInput.focus();
+      return;
+    }
+    if (Array.from(password).length < MIN_PASSWORD_CHARACTERS) {
+      password = '';
+      error.textContent = `비밀번호는 ${MIN_PASSWORD_CHARACTERS}자 이상이어야 합니다.`;
       passwordInput.focus();
       return;
     }

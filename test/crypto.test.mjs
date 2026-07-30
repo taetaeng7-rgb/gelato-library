@@ -72,6 +72,19 @@ test('GELATOE2 canonical header를 파싱하고 AAD로 복호화한다', async (
   assert.equal(vault.unlocked, false);
 });
 
+test('6자 비밀번호를 허용하고 5자는 거부한다', async () => {
+  const payload = { schemaVersion: 2, value: '최소 길이 검증' };
+  const bundle = await createBundle({ password: '123456', payload });
+  const acceptedVault = new GelatoVault();
+  assert.deepEqual(await acceptedVault.unlockCatalog(bundle, '123456'), payload);
+
+  const rejectedVault = new GelatoVault();
+  await assert.rejects(
+    rejectedVault.unlockCatalog(bundle, '12345'),
+    (error) => error.code === 'PASSWORD_TOO_SHORT',
+  );
+});
+
 test('틀린 비밀번호와 변조된 AAD/암호문을 거부한다', async () => {
   const bundle = await createBundle({ payload: { schemaVersion: 2 } });
   const vault = new GelatoVault();

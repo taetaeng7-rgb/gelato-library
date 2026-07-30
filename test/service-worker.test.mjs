@@ -5,6 +5,7 @@ import vm from 'node:vm';
 
 const swSource = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
 const appSource = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
+const cryptoSource = await readFile(new URL('../js/crypto.js', import.meta.url), 'utf8');
 const scope = 'https://example.test/gelato-library/';
 const activeCacheName = 'gelato-library-encrypted-v1-set-abcdefghijklmnop';
 const previousCacheName = 'gelato-library-encrypted-v1-set-ponmlkjihgfedcba';
@@ -128,5 +129,15 @@ test('새 service worker가 제어권을 얻으면 한 번만 reload한다', () 
   assert.match(
     appSource,
     /let reloadingForServiceWorker = false;[\s\S]*?controllerchange[\s\S]*?if \(reloadingForServiceWorker\) return;[\s\S]*?reloadingForServiceWorker = true;[\s\S]*?window\.location\.reload\(\)/u,
+  );
+});
+
+test('잠금 해제 화면과 코드가 최소 6자를 함께 강제한다', () => {
+  assert.match(cryptoSource, /MIN_PASSWORD_CHARACTERS = 6/u);
+  assert.match(appSource, /import \{ MIN_PASSWORD_CHARACTERS \} from '\.\/crypto\.js';/u);
+  assert.match(appSource, /minlength="\$\{MIN_PASSWORD_CHARACTERS\}"/u);
+  assert.match(
+    appSource,
+    /Array\.from\(password\)\.length < MIN_PASSWORD_CHARACTERS/u,
   );
 });

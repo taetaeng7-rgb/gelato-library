@@ -4,6 +4,7 @@
 const MAGIC = 'GELATOE2';
 const MAGIC_BYTES = new TextEncoder().encode(MAGIC);
 const MIN_ITERATIONS = 600_000;
+export const MIN_PASSWORD_CHARACTERS = 6;
 const MAX_ITERATIONS = 5_000_000;
 const MAX_HEADER_BYTES = 16_384;
 const HEADER_KEYS = ['bundleId', 'iterations', 'iv', 'kdf', 'salt', 'schemaVersion'];
@@ -143,6 +144,7 @@ export function parseBundle(input) {
 
 export async function deriveAesKey(password, salt, iterations) {
   if (typeof password !== 'string' || password.length === 0) fail('EMPTY_PASSWORD');
+  if (Array.from(password).length < MIN_PASSWORD_CHARACTERS) fail('PASSWORD_TOO_SHORT');
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) fail('WEBCRYPTO_UNAVAILABLE');
   const passwordMaterial = await subtle.importKey(

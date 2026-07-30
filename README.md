@@ -31,6 +31,8 @@ Pages 주소를 Safari 또는 Chrome에서 연 뒤 **홈 화면에 추가**하�
 - `data/`에는 `.enc` 번들과 빌드 검증용 `manifest.json`,
   `.gelato-output`만 둡니다.
 - 비밀번호, GitHub 토큰, 평문 Markdown, PDF, `.env`는 커밋하지 않습니다.
+- 비밀번호는 최소 6자를 허용하지만, 공개 암호문의 오프라인 추측 공격을
+  줄이려면 가능하면 12자 이상을 사용합니다.
 - 평문 문서는 명시된 allowlist의 `README.md`만 허용합니다.
 - 번들 생성은 비공개 저장소에서 실행합니다.
 - `npm run check`가 통과한 뒤 Pages에 배포합니다.
