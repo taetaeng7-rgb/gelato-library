@@ -745,6 +745,36 @@ button[disabled] {
   font-size: 1.5rem;
 }
 
+.section-list li[data-depth="1"] {
+  padding-left: 0.75rem;
+}
+
+.section-list li[data-depth="2"] {
+  padding-left: 1.5rem;
+}
+
+.section-list li[data-depth="1"] a,
+.section-list li[data-depth="2"] a {
+  min-height: 3.2rem;
+  font-size: 0.92rem;
+}
+
+.section-outline-title {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.section-outline-label {
+  min-width: 2.5rem;
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
+
 .chapter-summary {
   padding: 1.1rem;
   border: 1px solid var(--line);
@@ -985,6 +1015,13 @@ button[disabled] {
   margin: 0 auto;
   padding: 1.3rem 0;
   border-top: 1px solid var(--line);
+}
+
+.reader-keyboard-hint {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-align: center;
 }
 
 .reader-footer-nav {

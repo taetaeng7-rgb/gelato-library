@@ -1,5 +1,5 @@
 const APP_CACHE_PREFIX = 'gelato-library-app-';
-const APP_CACHE = 'gelato-library-app-v4';
+const APP_CACHE = 'gelato-library-app-v5';
 const LEGACY_ENCRYPTED_CACHE = 'gelato-library-encrypted-v1';
 const ENCRYPTED_CONTROL_CACHE = 'gelato-library-encrypted-control-v1';
 const ENCRYPTED_POINTER_PATH = './__gelato-cache__/encrypted-active';
@@ -17,6 +17,7 @@ const APP_SHELL = [
   './js/app.js',
   './js/crypto.js',
   './js/data.js',
+  './js/reader-navigation.js',
   './js/reader-progress.js',
   './js/router.js',
   './js/sanitize.js',

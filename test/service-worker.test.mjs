@@ -132,6 +132,11 @@ test('새 service worker가 제어권을 얻으면 한 번만 reload한다', () 
   );
 });
 
+test('키보드 페이지 이동 모듈을 최신 앱 셸에 포함한다', () => {
+  assert.match(swSource, /gelato-library-app-v5/u);
+  assert.match(swSource, /\.\/js\/reader-navigation\.js/u);
+});
+
 test('잠금 해제 화면과 코드가 최소 6자를 함께 강제한다', () => {
   assert.match(cryptoSource, /MIN_PASSWORD_CHARACTERS = 6/u);
   assert.match(appSource, /import \{ MIN_PASSWORD_CHARACTERS \} from '\.\/crypto\.js';/u);

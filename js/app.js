@@ -12,6 +12,12 @@ import {
   createStore,
   getTargetProgress,
 } from './store.js';
+import {
+  readerKeyDirection,
+  readerPageAction,
+  readerPageDistance,
+  sectionOutlineEntries,
+} from './reader-navigation.js';
 import { escapeHtml } from './sanitize.js';
 import { MIN_PASSWORD_CHARACTERS } from './crypto.js';
 
@@ -441,6 +447,7 @@ async function renderContentDetail(
       ? recent.sectionId
       : content.sections.find((section) => !targetState?.sections?.[section.id]?.complete)?.id
         || content.sections[0].id;
+    const sectionEntries = sectionOutlineEntries(content.sections);
 
     app.innerHTML = `
       <section class="page-shell narrow-shell">
@@ -470,15 +477,18 @@ async function renderContentDetail(
         </article>
         <h2>이 자료의 절</h2>
         <ol class="section-list">
-          ${content.sections.map((section, index) => {
+          ${sectionEntries.map(({ section, label, depth }) => {
             const sectionState = targetState?.sections?.[section.id];
             const sectionPercent = sectionState?.totalBlocks
               ? Math.round(((sectionState.blockIndex + 1) / sectionState.totalBlocks) * 100)
               : 0;
             return `
-              <li>
+              <li data-depth="${depth}">
                 <a href="${routes.reader(bookId, targetKind, targetId, section.id)}">
-                  <span>${index + 1}. ${escapeHtml(section.title)}</span>
+                  <span class="section-outline-title">
+                    <span class="section-outline-label">${escapeHtml(label)}</span>
+                    <span>${escapeHtml(section.title)}</span>
+                  </span>
                   <small class="muted">${Math.min(100, Math.max(0, sectionPercent))}%</small>
                 </a>
               </li>`;
@@ -819,28 +829,33 @@ async function renderReader(
         </header>
         <div class="reader-content" id="reader-content"></div>
         <footer class="reader-footer">
+          <p class="reader-keyboard-hint">키보드 ← · → 한 화면씩 이동</p>
           <nav class="reader-footer-nav" aria-label="본문 이동">
             ${previousSection ? `
-              <a href="${routes.reader(bookId, targetKind, targetId, previousSection.id)}">
+              <a href="${routes.reader(bookId, targetKind, targetId, previousSection.id)}"
+                data-reader-prev aria-keyshortcuts="ArrowLeft">
                 <small>← 이전 절</small><strong>${escapeHtml(previousSection.title)}</strong>
               </a>
             ` : previousTarget ? `
-              <a href="${targetDetailRoute(bookId, previousTarget.targetKind, previousTarget.targetId)}">
+              <a href="${targetDetailRoute(bookId, previousTarget.targetKind, previousTarget.targetId)}"
+                data-reader-prev aria-keyshortcuts="ArrowLeft">
                 <small>← 이전 ${previousTarget.targetKind === 'chapter' ? '챕터' : '자료'}</small>
                 <strong>${escapeHtml(previousTarget.title)}</strong>
               </a>
             ` : '<span></span>'}
             ${nextSection ? `
-              <a href="${routes.reader(bookId, targetKind, targetId, nextSection.id)}">
+              <a href="${routes.reader(bookId, targetKind, targetId, nextSection.id)}"
+                data-reader-next aria-keyshortcuts="ArrowRight">
                 <small>다음 절 →</small><strong>${escapeHtml(nextSection.title)}</strong>
               </a>
             ` : nextTarget ? `
-              <a href="${targetDetailRoute(bookId, nextTarget.targetKind, nextTarget.targetId)}">
+              <a href="${targetDetailRoute(bookId, nextTarget.targetKind, nextTarget.targetId)}"
+                data-reader-next aria-keyshortcuts="ArrowRight">
                 <small>다음 ${nextTarget.targetKind === 'chapter' ? '챕터' : '자료'} →</small>
                 <strong>${escapeHtml(nextTarget.title)}</strong>
               </a>
             ` : `
-              <a href="${routes.book(bookId)}">
+              <a href="${routes.book(bookId)}" data-reader-next aria-keyshortcuts="ArrowRight">
                 <small>책 읽기 완료</small><strong>챕터 목록으로 →</strong>
               </a>`}
           </nav>
@@ -850,6 +865,8 @@ async function renderReader(
     const content = app.querySelector('#reader-content');
     const progressElement = app.querySelector('.reader-progress');
     const bookmarkButton = app.querySelector('#bookmark-button');
+    const previousLink = app.querySelector('[data-reader-prev]');
+    const nextLink = app.querySelector('[data-reader-next]');
     const { entries, foldedHeadingId } = displayEntriesForSection(section);
     const foldedHeadingSelected = selectedBlockId === foldedHeadingId;
     const readerHeader = app.querySelector('#reader-section-header');
@@ -871,6 +888,49 @@ async function renderReader(
       bookmarkButton.textContent = added ? '★ 저장됨' : '☆ 책갈피';
       bookmarkButton.setAttribute('aria-pressed', String(added));
       toast(added ? '책갈피에 저장했습니다.' : '책갈피를 삭제했습니다.');
+    }, { signal });
+
+    window.addEventListener('keydown', (event) => {
+      const selection = window.getSelection?.();
+      const direction = readerKeyDirection(event, {
+        dialogOpen: settingsDialog.open,
+        selectionActive: Boolean(
+          selection && !selection.isCollapsed && selection.toString().trim()
+        ),
+      });
+      if (!direction) return;
+
+      const bottomRect = bottomNav.hidden
+        ? null
+        : bottomNav.getBoundingClientRect();
+      const bottomInset = bottomRect
+        && bottomRect.bottom >= window.innerHeight - 1
+        ? Math.max(0, window.innerHeight - bottomRect.top)
+        : 0;
+      const metrics = {
+        scrollTop: window.scrollY,
+        viewportHeight: window.innerHeight,
+        documentHeight: document.documentElement.scrollHeight,
+        headerHeight: document.querySelector('#site-header')
+          ?.getBoundingClientRect().height ?? 0,
+        bottomInset,
+      };
+      const action = readerPageAction(direction, metrics);
+      if (action === 'next' || action === 'previous') {
+        const link = direction > 0 ? nextLink : previousLink;
+        if (!link) return;
+        event.preventDefault();
+        link.click();
+        return;
+      }
+
+      event.preventDefault();
+      const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      window.scrollBy({
+        top: direction * readerPageDistance(metrics),
+        left: 0,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
     }, { signal });
 
     let highestIndex = initialIndex;

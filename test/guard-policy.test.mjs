@@ -73,9 +73,9 @@ test('확장자 우회명과 확장자 없는 평문 후보도 exact allowlist�
   }
 });
 
-test('현재 공개 산출물 70개는 exact allowlist와 일치한다', async () => {
+test('현재 공개 산출물 72개는 exact allowlist와 일치한다', async () => {
   const files = await filesBelow(root);
-  assert.equal(files.length, 70);
+  assert.equal(files.length, 72);
   assert.deepEqual(
     files
       .map((file) => [file, publicPathViolation(file)])
