@@ -16,6 +16,8 @@ import {
   readerKeyDirection,
   readerPageAction,
   readerPageDistance,
+  resolveReadableSection,
+  sectionHasReadableContent,
   sectionOutlineEntries,
 } from './reader-navigation.js';
 import { escapeHtml } from './sanitize.js';
@@ -418,15 +420,36 @@ async function renderContentDetail(
   try {
     const content = await repository.loadContent(bookId, targetKind, targetId);
     if (version !== renderVersion) return;
+    const readableSections = content.sections.filter(sectionHasReadableContent);
+    if (readableSections.length === 0) {
+      renderError({ code: 'NOT_FOUND' }, '읽을 본문이 없습니다');
+      return;
+    }
+    store.reconcileReaderSections(
+      bookId,
+      targetKind,
+      targetId,
+      readableSections.map((section) => ({
+        id: section.id,
+        totalBlocks: section.blocks.length,
+      })),
+    );
     if (targetBlockId) {
       const targetSection = content.sections.find(
         (section) => section.blocks.some((block) => block.id === targetBlockId),
       );
       if (targetSection) {
+        const readableTarget = resolveReadableSection(content.sections, targetSection.id);
         history.replaceState(
           null,
           '',
-          routes.reader(bookId, targetKind, targetId, targetSection.id, targetBlockId),
+          routes.reader(
+            bookId,
+            targetKind,
+            targetId,
+            readableTarget.id,
+            readableTarget.id === targetSection.id ? targetBlockId : null,
+          ),
         );
         await renderRoute();
         return;
@@ -440,13 +463,16 @@ async function renderContentDetail(
     );
     const percent = chapterProgressPercent(targetState);
     const recent = store.get().recent;
-    const preferredSection = recent?.bookId === bookId
+    const recentSection = recent?.bookId === bookId
       && recent?.targetKind === targetKind
       && recent?.targetId === targetId
-      && content.sections.some((section) => section.id === recent.sectionId)
-      ? recent.sectionId
-      : content.sections.find((section) => !targetState?.sections?.[section.id]?.complete)?.id
-        || content.sections[0].id;
+      ? resolveReadableSection(content.sections, recent.sectionId)
+      : null;
+    const preferredSection = recentSection?.id
+      || readableSections.find(
+        (section) => !targetState?.sections?.[section.id]?.complete,
+      )?.id
+      || readableSections[0].id;
     const sectionEntries = sectionOutlineEntries(content.sections);
 
     app.innerHTML = `
@@ -477,18 +503,34 @@ async function renderContentDetail(
         </article>
         <h2>이 자료의 절</h2>
         <ol class="section-list">
-          ${sectionEntries.map(({ section, label, depth }) => {
+          ${sectionEntries.map(({ section, label, depth }, sectionIndex) => {
             const sectionState = targetState?.sections?.[section.id];
             const sectionPercent = sectionState?.totalBlocks
               ? Math.round(((sectionState.blockIndex + 1) / sectionState.totalBlocks) * 100)
               : 0;
+            const titleMarkup = `
+              <span class="section-outline-title">
+                <span class="section-outline-label">${escapeHtml(label)}</span>
+                <span>${escapeHtml(section.title)}</span>
+              </span>`;
+            if (!sectionHasReadableContent(
+              section,
+              sectionIndex,
+              content.sections,
+            )) {
+              return `
+                <li data-depth="${depth}" data-section-group>
+                  <div class="section-group" role="heading"
+                    aria-level="${Math.min(6, depth + 3)}">
+                    ${titleMarkup}
+                    <small class="muted">구분</small>
+                  </div>
+                </li>`;
+            }
             return `
               <li data-depth="${depth}">
                 <a href="${routes.reader(bookId, targetKind, targetId, section.id)}">
-                  <span class="section-outline-title">
-                    <span class="section-outline-label">${escapeHtml(label)}</span>
-                    <span>${escapeHtml(section.title)}</span>
-                  </span>
+                  ${titleMarkup}
                   <small class="muted">${Math.min(100, Math.max(0, sectionPercent))}%</small>
                 </a>
               </li>`;
@@ -760,14 +802,42 @@ async function renderReader(
   try {
     const targetContent = await repository.loadContent(bookId, targetKind, targetId);
     if (version !== renderVersion) return;
-    const sectionIndex = targetContent.sections.findIndex((section) => section.id === sectionId);
-    if (sectionIndex < 0) {
+    const requestedSection = targetContent.sections.find(
+      (candidate) => candidate.id === sectionId,
+    );
+    if (!requestedSection) {
       renderError({ code: 'NOT_FOUND' }, '절을 찾을 수 없습니다');
       return;
     }
-    const section = targetContent.sections[sectionIndex];
-    const previousSection = targetContent.sections[sectionIndex - 1] || null;
-    const nextSection = targetContent.sections[sectionIndex + 1] || null;
+    const readableSections = targetContent.sections.filter(sectionHasReadableContent);
+    store.reconcileReaderSections(
+      bookId,
+      targetKind,
+      targetId,
+      readableSections.map((candidate) => ({
+        id: candidate.id,
+        totalBlocks: candidate.blocks.length,
+      })),
+    );
+    const section = resolveReadableSection(targetContent.sections, sectionId);
+    if (!section) {
+      renderError({ code: 'NOT_FOUND' }, '읽을 본문이 없습니다');
+      return;
+    }
+    if (section.id !== requestedSection.id) {
+      history.replaceState(
+        null,
+        '',
+        routes.reader(bookId, targetKind, targetId, section.id),
+      );
+      await renderRoute();
+      return;
+    }
+    const sectionIndex = readableSections.findIndex(
+      (candidate) => candidate.id === section.id,
+    );
+    const previousSection = readableSections[sectionIndex - 1] || null;
+    const nextSection = readableSections[sectionIndex + 1] || null;
     const orderedTargets = orderedBookTargets(book);
     const targetIndex = orderedTargets.findIndex(
       (item) => item.targetKind === targetKind && item.targetId === targetId,
@@ -806,7 +876,7 @@ async function renderReader(
           <p class="reader-kicker">${escapeHtml(targetKicker({
             ...targetContent,
             targetKind,
-          }))} · ${sectionIndex + 1}/${targetContent.sections.length}절</p>
+          }))} · ${sectionIndex + 1}/${readableSections.length}절</p>
           <h1>${escapeHtml(section.title)}</h1>
           <div class="reader-tools">
             <div class="reader-progress">${progressMarkup(
@@ -945,7 +1015,7 @@ async function renderReader(
         sectionId,
         highestIndex,
         section.blocks.length,
-        targetContent.sections.length,
+        readableSections.length,
       );
       updateReaderProgress(progressElement, highestIndex, section.blocks.length);
     };

@@ -4,6 +4,8 @@ import {
   readerKeyDirection,
   readerPageAction,
   readerPageDistance,
+  resolveReadableSection,
+  sectionHasReadableContent,
   sectionOutlineEntries,
 } from '../js/reader-navigation.js';
 
@@ -72,4 +74,48 @@ test('목차의 H1~H3 계층을 깊이와 윤곽 번호로 보존한다', () => 
   assert.deepEqual(entries.map(({ label }) => label), ['1', '1.1', '1.2', '2', '2.1']);
   assert.deepEqual(entries.map(({ depth }) => depth), [0, 1, 1, 0, 1]);
   assert.deepEqual(entries.map(({ section }) => section.id), ['a', 'b', 'c', 'd', 'e']);
+});
+
+test('본문 없는 상위 제목과 페이지 표식만 있는 절은 읽기 화면에서 건너뛴다', () => {
+  const group = {
+    id: 'group',
+    title: '목차',
+    level: 2,
+    blocks: [
+      { type: 'sourceAnchor', pdfPage: '8' },
+      { type: 'heading', text: '목차' },
+      { type: 'thematicBreak' },
+    ],
+  };
+  const readable = {
+    id: 'readable',
+    title: '제1장',
+    level: 3,
+    blocks: [
+      { type: 'heading', text: '제1장' },
+      { type: 'paragraph', text: '실제 내용' },
+    ],
+  };
+  const sections = [group, readable];
+  assert.equal(sectionHasReadableContent(group, 0, sections), false);
+  assert.equal(sectionHasReadableContent(readable, 1, sections), true);
+  assert.equal(resolveReadableSection([group, readable], 'group'), readable);
+});
+
+test('제목 자체가 내용인 헌사 같은 leaf 절은 건너뛰지 않는다', () => {
+  const readable = {
+    id: 'readable',
+    title: '본문',
+    level: 2,
+    blocks: [{ type: 'paragraph', text: '내용' }],
+  };
+  const dedication = {
+    id: 'dedication',
+    title: '부모님을 기리며',
+    level: 3,
+    blocks: [{ type: 'heading', text: '부모님을 기리며' }],
+  };
+  const sections = [readable, dedication];
+  assert.equal(sectionHasReadableContent(dedication, 1, sections), true);
+  assert.equal(resolveReadableSection(sections, 'dedication'), dedication);
 });

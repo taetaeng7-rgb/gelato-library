@@ -21,6 +21,10 @@ function nonNegativeNumber(value) {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
+function normalizedSectionTitle(value) {
+  return String(value ?? '').normalize('NFKC').trim().toLocaleLowerCase('ko');
+}
+
 export function readerKeyDirection(
   event,
   { dialogOpen = false, selectionActive = false } = {},
@@ -100,4 +104,53 @@ export function sectionOutlineEntries(sections) {
       depth: level - baseLevel,
     };
   });
+}
+
+function sectionHasOwnReadableBody(section) {
+  if (!section || !Array.isArray(section.blocks)) return false;
+  const title = normalizedSectionTitle(section.title);
+  let foldedHeading = false;
+  for (const block of section.blocks) {
+    if (!block || block.type === 'sourceAnchor' || block.type === 'thematicBreak') continue;
+    if (!foldedHeading
+        && block.type === 'heading'
+        && normalizedSectionTitle(block.text) === title) {
+      foldedHeading = true;
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
+
+export function sectionHasReadableContent(section, index = -1, sections = [section]) {
+  if (sectionHasOwnReadableBody(section)) return true;
+  const resolvedIndex = Number.isInteger(index) && index >= 0
+    ? index
+    : sections.indexOf(section);
+  const nextSection = resolvedIndex >= 0 ? sections[resolvedIndex + 1] : null;
+  const level = Number.isInteger(section?.level) ? section.level : 1;
+  const nextLevel = Number.isInteger(nextSection?.level) ? nextSection.level : 1;
+  // A title-only item is a non-reading group only when it directly owns a
+  // deeper child. A leaf heading such as a dedication remains readable.
+  return !(nextSection && nextLevel > level);
+}
+
+export function resolveReadableSection(sections, sectionId) {
+  if (!Array.isArray(sections) || sections.length === 0) return null;
+  const requestedIndex = sections.findIndex((section) => section?.id === sectionId);
+  if (requestedIndex >= 0
+      && sectionHasReadableContent(sections[requestedIndex], requestedIndex, sections)) {
+    return sections[requestedIndex];
+  }
+  const start = requestedIndex >= 0 ? requestedIndex : -1;
+  for (let index = start + 1; index < sections.length; index += 1) {
+    if (sectionHasReadableContent(sections[index], index, sections)) return sections[index];
+  }
+  for (let index = start - 1; index >= 0; index -= 1) {
+    if (sectionHasReadableContent(sections[index], index, sections)) return sections[index];
+  }
+  return sections.find((section, index) =>
+    sectionHasReadableContent(section, index, sections)
+  ) ?? null;
 }

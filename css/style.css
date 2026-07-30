@@ -728,7 +728,8 @@ button[disabled] {
   border-bottom: 1px solid var(--line);
 }
 
-.section-list a {
+.section-list a,
+.section-list .section-group {
   display: flex;
   min-height: 3.6rem;
   align-items: center;
@@ -737,6 +738,11 @@ button[disabled] {
   padding: 0.8rem 0.3rem;
   color: var(--ink);
   text-decoration: none;
+}
+
+.section-list .section-group {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .section-list a::after {
@@ -754,7 +760,9 @@ button[disabled] {
 }
 
 .section-list li[data-depth="1"] a,
-.section-list li[data-depth="2"] a {
+.section-list li[data-depth="2"] a,
+.section-list li[data-depth="1"] .section-group,
+.section-list li[data-depth="2"] .section-group {
   min-height: 3.2rem;
   font-size: 0.92rem;
 }

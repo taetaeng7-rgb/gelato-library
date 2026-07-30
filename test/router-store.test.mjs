@@ -102,6 +102,39 @@ test('기존 chapterId 상태를 targetKind/targetId 구조로 이관한다', ()
   assert.equal(store.get().recent.targetId, '01');
 });
 
+test('읽지 않는 목차 그룹을 진도에서 제외하고 기존 본문 진도를 이관한다', () => {
+  const storage = memoryStorage();
+  const store = createStore(storage);
+  store.setSectionProgress('goff', 'chapter', '01', 'body-1', 1, 2, 3);
+  store.setSectionProgress('goff', 'chapter', '01', 'body-2', 0, 1, 3);
+  store.setSectionProgress('goff', 'chapter', '01', 'group', 0, 1, 3);
+  store.reconcileReaderSections(
+    'goff',
+    'chapter',
+    '01',
+    [
+      { id: 'body-1', totalBlocks: 2, title: '저장되면 안 되는 제목' },
+      { id: 'body-2', totalBlocks: 1 },
+    ],
+  );
+  const target = getTargetProgress(store.get().progress, 'goff', 'chapter', '01');
+  assert.equal(target.totalSections, 2);
+  assert.equal(target.sections.group, undefined);
+  assert.equal(chapterProgressPercent(target), 100);
+  assert.equal(JSON.stringify(storage.dump()).includes('저장되면 안 되는 제목'), false);
+
+  const fresh = createStore(memoryStorage());
+  fresh.reconcileReaderSections(
+    'goff',
+    'chapter',
+    '02',
+    [{ id: 'body', totalBlocks: 4 }],
+  );
+  assert.equal(chapterProgressPercent(
+    getTargetProgress(fresh.get().progress, 'goff', 'chapter', '02'),
+  ), 0);
+});
+
 test('글자 크기와 테마 허용값만 보존한다', () => {
   const storage = memoryStorage();
   const store = createStore(storage);

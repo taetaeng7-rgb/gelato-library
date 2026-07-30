@@ -192,6 +192,59 @@ export function createStore(storage = globalThis.localStorage) {
       save();
     },
 
+    reconcileReaderSections(
+      bookId,
+      targetKind,
+      targetId,
+      sections,
+    ) {
+      const targetKey = targetProgressKey(targetKind, targetId);
+      if (!cleanId(bookId) || !targetKey || !Array.isArray(sections)) return;
+      const current = sections
+        .map((section) => ({
+          id: cleanId(section?.id),
+          totalBlocks: Number.isInteger(section?.totalBlocks)
+            ? Math.max(0, section.totalBlocks)
+            : 0,
+        }))
+        .filter((section) => section.id && section.totalBlocks > 0);
+      if (current.length === 0 || new Set(current.map((section) => section.id)).size !== current.length) {
+        return;
+      }
+
+      const oldTarget = state.progress[bookId]?.[targetKey]
+        || { sections: {}, totalSections: 0 };
+      const nextSections = {};
+      for (const section of current) {
+        const oldSection = oldTarget.sections?.[section.id];
+        if (!oldSection) continue;
+        const blockIndex = Math.min(
+          Math.max(-1, oldSection.blockIndex ?? -1),
+          section.totalBlocks - 1,
+        );
+        nextSections[section.id] = {
+          blockIndex,
+          totalBlocks: section.totalBlocks,
+          complete: blockIndex >= section.totalBlocks - 1,
+        };
+      }
+      state = {
+        ...state,
+        progress: {
+          ...state.progress,
+          [bookId]: {
+            ...(state.progress[bookId] || {}),
+            [targetKey]: {
+              ...oldTarget,
+              totalSections: current.length,
+              sections: nextSections,
+            },
+          },
+        },
+      };
+      save();
+    },
+
     toggleBookmark(bookmark) {
       const clean = sanitizeBookmarks([bookmark])[0];
       if (!clean) return false;
