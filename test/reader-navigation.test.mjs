@@ -4,6 +4,7 @@ import {
   readerKeyDirection,
   readerPageAction,
   readerPageDistance,
+  readerSwipeDirection,
   resolveReadableSection,
   sectionHasReadableContent,
   sectionOutlineEntries,
@@ -38,6 +39,25 @@ test('입력·선택·수정키·반복·IME·대화상자에서는 방향키를
   assert.equal(readerKeyDirection(keyboardEvent({ ctrlKey: true })), 0);
   assert.equal(readerKeyDirection(keyboardEvent(), { dialogOpen: true }), 0);
   assert.equal(readerKeyDirection(keyboardEvent(), { selectionActive: true }), 0);
+});
+
+test('모바일 좌우 스와이프를 읽기 방향으로 해석한다', () => {
+  const start = { x: 220, y: 300, time: 100 };
+  assert.equal(
+    readerSwipeDirection(start, { x: 130, y: 305, time: 350 }),
+    1,
+  );
+  assert.equal(
+    readerSwipeDirection(start, { x: 300, y: 295, time: 350 }),
+    -1,
+  );
+});
+
+test('짧거나 느리거나 세로에 가까운 제스처는 스와이프로 해석하지 않는다', () => {
+  const start = { x: 220, y: 300, time: 100 };
+  assert.equal(readerSwipeDirection(start, { x: 180, y: 302, time: 250 }), 0);
+  assert.equal(readerSwipeDirection(start, { x: 130, y: 305, time: 900 }), 0);
+  assert.equal(readerSwipeDirection(start, { x: 130, y: 390, time: 350 }), 0);
 });
 
 test('절 중간에서는 한 화면 이동하고 위·아래 끝에서만 이웃 링크로 이동한다', () => {

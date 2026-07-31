@@ -218,10 +218,21 @@ export function createStore(storage = globalThis.localStorage) {
       for (const section of current) {
         const oldSection = oldTarget.sections?.[section.id];
         if (!oldSection) continue;
-        const blockIndex = Math.min(
-          Math.max(-1, oldSection.blockIndex ?? -1),
-          section.totalBlocks - 1,
-        );
+        const oldIndex = Math.max(-1, oldSection.blockIndex ?? -1);
+        const oldTotal = Number.isInteger(oldSection.totalBlocks)
+          ? Math.max(0, oldSection.totalBlocks)
+          : 0;
+        const blockIndex = oldSection.complete
+          ? section.totalBlocks - 1
+          : oldTotal > 0 && oldTotal !== section.totalBlocks
+            ? Math.max(
+                -1,
+                Math.min(
+                  section.totalBlocks - 1,
+                  Math.floor(((oldIndex + 1) / oldTotal) * section.totalBlocks) - 1,
+                ),
+              )
+            : Math.min(oldIndex, section.totalBlocks - 1);
         nextSections[section.id] = {
           blockIndex,
           totalBlocks: section.totalBlocks,

@@ -290,6 +290,9 @@ function validateBlock(block, errorCode) {
       || safeText(String(value), 100);
     if (!pageValueIsSafe(block.pdfPage)
         || !pageValueIsSafe(block.printPage)
+        || (block.printLocator != null
+          && (!safeText(block.printLocator, 200) || /[<>\r\n;]/u.test(block.printLocator)))
+        || (block.printPage != null && block.printLocator != null)
         || (block.pageRole != null && !safeText(block.pageRole, 100))) {
       fail(errorCode);
     }
@@ -451,10 +454,24 @@ export class BundleRepository {
     return this.#catalogSalt;
   }
 
+  get sessionKey() {
+    return this.#vault.sessionKey;
+  }
+
   async unlock(password) {
     const bytes = await fetchBundle(CATALOG_PATH);
     const parsed = parseBundle(bytes);
     const catalog = await this.#vault.unlockCatalog(bytes, password);
+    this.#catalog = validateCatalog(catalog);
+    this.#catalogBytes = bytes.slice(0);
+    this.#catalogSalt = parsed.header.salt;
+    return this.#catalog;
+  }
+
+  async restore(key) {
+    const bytes = await fetchBundle(CATALOG_PATH);
+    const parsed = parseBundle(bytes);
+    const catalog = await this.#vault.restoreCatalog(bytes, key);
     this.#catalog = validateCatalog(catalog);
     this.#catalogBytes = bytes.slice(0);
     this.#catalogSalt = parsed.header.salt;

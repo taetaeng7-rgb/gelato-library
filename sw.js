@@ -1,5 +1,5 @@
 const APP_CACHE_PREFIX = 'gelato-library-app-';
-const APP_CACHE = 'gelato-library-app-v6';
+const APP_CACHE = 'gelato-library-app-v8';
 const LEGACY_ENCRYPTED_CACHE = 'gelato-library-encrypted-v1';
 const ENCRYPTED_CONTROL_CACHE = 'gelato-library-encrypted-control-v1';
 const ENCRYPTED_POINTER_PATH = './__gelato-cache__/encrypted-active';
@@ -22,6 +22,7 @@ const APP_SHELL = [
   './js/router.js',
   './js/sanitize.js',
   './js/store.js',
+  './js/unlock-session.js',
 ];
 
 self.addEventListener('install', (event) => {

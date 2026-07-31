@@ -16,12 +16,14 @@ import {
   readerKeyDirection,
   readerPageAction,
   readerPageDistance,
+  readerSwipeDirection,
   resolveReadableSection,
   sectionHasReadableContent,
   sectionOutlineEntries,
 } from './reader-navigation.js';
 import { escapeHtml } from './sanitize.js';
 import { MIN_PASSWORD_CHARACTERS } from './crypto.js';
+import { createUnlockSessionManager } from './unlock-session.js';
 
 const app = document.querySelector('#app');
 const skipLink = document.querySelector('.skip-link');
@@ -32,8 +34,20 @@ const settingsButton = document.querySelector('#reader-settings-button');
 const settingsDialog = document.querySelector('#settings-dialog');
 const themeMeta = document.querySelector('meta[name="theme-color"]');
 const toastElement = document.querySelector('#toast');
+const SWIPE_BLOCKED_TARGETS = [
+  'a[href]',
+  'button',
+  'input',
+  'textarea',
+  'select',
+  'summary',
+  '[contenteditable]:not([contenteditable="false"])',
+  '.table-scroll',
+  'pre',
+].join(', ');
 const repository = new BundleRepository();
 const store = createStore();
+const unlockSession = createUnlockSessionManager();
 const lockChannel = 'BroadcastChannel' in globalThis
   ? new BroadcastChannel('gelato-library-session')
   : null;
@@ -163,7 +177,7 @@ function renderUnlock() {
       <div class="unlock-card">
         <div class="unlock-emblem" aria-hidden="true">G</div>
         <h1 id="unlock-title">젤라토 서재 열기</h1>
-        <p>비밀번호는 이 탭의 메모리에서만 사용되며 브라우저 저장소나 서버로 전송되지 않습니다.</p>
+        <p>비밀번호 원문은 저장하거나 서버로 전송하지 않습니다.</p>
         <form id="unlock-form">
           <label class="field-label" for="password">비밀번호 (${MIN_PASSWORD_CHARACTERS}자 이상)</label>
           <div class="password-row">
@@ -178,7 +192,7 @@ function renderUnlock() {
         </form>
         <div class="privacy-note">
           <span aria-hidden="true">◇</span>
-          <span>새로고침하거나 잠그면 키가 사라져 비밀번호를 다시 입력해야 합니다.</span>
+          <span>이 탭에서는 새로고침해도 잠금이 유지됩니다. 잠그거나 세션이 만료되면 키가 사라집니다.</span>
         </div>
       </div>
     </section>`;
@@ -218,10 +232,14 @@ function renderUnlock() {
     try {
       await repository.unlock(password);
       password = '';
+      const sessionSaved = await unlockSession.save(repository.sessionKey);
       setUnlockedChrome(true);
       const route = parseHash();
       if (route.name === 'notFound') location.hash = routes.library();
       else await renderRoute();
+      if (!sessionSaved) {
+        toast('이 브라우저에서는 새로고침 후 비밀번호를 다시 입력해야 합니다.');
+      }
     } catch (unlockError) {
       password = '';
       error.textContent = errorMessage(unlockError);
@@ -650,7 +668,17 @@ function makeTable(block) {
   wrapper.className = 'table-scroll';
   wrapper.tabIndex = 0;
   wrapper.setAttribute('role', 'region');
-  wrapper.setAttribute('aria-label', '가로로 스크롤할 수 있는 표');
+  const tableSummary = block.head
+    .map((value) => String(value ?? '').trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(', ');
+  wrapper.setAttribute(
+    'aria-label',
+    tableSummary
+      ? `가로로 스크롤할 수 있는 표: ${tableSummary}`
+      : '가로로 스크롤할 수 있는 표',
+  );
   const table = document.createElement('table');
   if (block.head.length) {
     const head = document.createElement('thead');
@@ -685,7 +713,7 @@ function makeTable(block) {
 
 function makeBlockContent(block) {
   if (block.type === 'heading') {
-    const level = Math.min(4, Math.max(2, Number(block.level) || 2));
+    const level = Math.min(6, Math.max(2, Number(block.level) || 2));
     const heading = document.createElement(`h${level}`);
     heading.textContent = block.text;
     return heading;
@@ -705,8 +733,17 @@ function makeBlockContent(block) {
   if (block.type === 'code' || block.type === 'math') {
     const pre = document.createElement('pre');
     const code = document.createElement('code');
+    const language = block.type === 'code' ? block.language : null;
+    const label = block.type === 'math'
+      ? '수식'
+      : language && language !== 'text'
+        ? `${language} 코드 예시`
+        : '계산 및 텍스트 예시';
+    pre.tabIndex = 0;
+    pre.setAttribute('role', 'region');
+    pre.setAttribute('aria-label', label);
     code.textContent = block.text;
-    if (block.type === 'code' && block.language) code.dataset.language = block.language;
+    if (language) code.dataset.language = language;
     pre.append(code);
     return pre;
   }
@@ -718,24 +755,32 @@ function makeBlockContent(block) {
     return aside;
   }
   if (block.type === 'figureDescription') {
-    const figure = document.createElement('figure');
-    const caption = document.createElement('figcaption');
-    caption.textContent = block.text;
-    figure.append(caption);
-    return figure;
+    const aside = document.createElement('aside');
+    aside.className = 'visual-description';
+    aside.setAttribute('aria-label', '시각 자료 설명');
+    const label = document.createElement('strong');
+    label.className = 'visual-description-label';
+    label.textContent = '시각 자료 설명';
+    const paragraph = document.createElement('p');
+    paragraph.textContent = block.text;
+    aside.append(label, paragraph);
+    return aside;
   }
   if (block.type === 'list') return makeList(block);
   if (block.type === 'table') return makeTable(block);
   if (block.type === 'sourceAnchor') {
     const marker = document.createElement('small');
     marker.className = 'source-anchor';
-    const values = [];
+    const values = ['원문'];
     if (block.pdfPage != null) values.push(`PDF ${block.pdfPage}쪽`);
     if (block.printPage != null) values.push(`인쇄본 ${block.printPage}쪽`);
+    if (block.printLocator) values.push(`인쇄본 ${block.printLocator}`);
     marker.textContent = values.join(' · ');
     return marker;
   }
-  return document.createElement('hr');
+  // 독자용 콘텐츠에는 구분선을 표시하지 않는다. 알 수 없는 block도
+  // 장식선으로 오인해 렌더링하지 않는다.
+  return null;
 }
 
 function displayEntriesForSection(section) {
@@ -760,14 +805,17 @@ function displayEntriesForSection(section) {
 function addReaderBlocks(container, entries, highlightedBlockId) {
   const fragment = document.createDocumentFragment();
   entries.forEach(({ block, index }) => {
+    const blockContent = makeBlockContent(block);
+    if (!blockContent) return;
     const wrapper = document.createElement('div');
     wrapper.className = 'content-block';
     wrapper.id = `block-${block.id}`;
     wrapper.tabIndex = -1;
     wrapper.dataset.blockId = block.id;
     wrapper.dataset.blockIndex = String(index);
+    wrapper.dataset.blockType = block.type;
     if (block.id === highlightedBlockId) wrapper.dataset.highlighted = 'true';
-    wrapper.append(makeBlockContent(block));
+    wrapper.append(blockContent);
     fragment.append(wrapper);
   });
   container.replaceChildren(fragment);
@@ -899,7 +947,7 @@ async function renderReader(
         </header>
         <div class="reader-content" id="reader-content"></div>
         <footer class="reader-footer">
-          <p class="reader-keyboard-hint">키보드 ← · → 한 화면씩 이동</p>
+          <p class="reader-keyboard-hint">키보드 ← · → / 모바일 좌우 스와이프: 한 화면씩 이동</p>
           <nav class="reader-footer-nav" aria-label="본문 이동">
             ${previousSection ? `
               <a href="${routes.reader(bookId, targetKind, targetId, previousSection.id)}"
@@ -960,16 +1008,7 @@ async function renderReader(
       toast(added ? '책갈피에 저장했습니다.' : '책갈피를 삭제했습니다.');
     }, { signal });
 
-    window.addEventListener('keydown', (event) => {
-      const selection = window.getSelection?.();
-      const direction = readerKeyDirection(event, {
-        dialogOpen: settingsDialog.open,
-        selectionActive: Boolean(
-          selection && !selection.isCollapsed && selection.toString().trim()
-        ),
-      });
-      if (!direction) return;
-
+    const readerMetrics = () => {
       const bottomRect = bottomNav.hidden
         ? null
         : bottomNav.getBoundingClientRect();
@@ -985,23 +1024,103 @@ async function renderReader(
           ?.getBoundingClientRect().height ?? 0,
         bottomInset,
       };
+      return metrics;
+    };
+
+    const moveReaderPage = (direction) => {
+      const metrics = readerMetrics();
       const action = readerPageAction(direction, metrics);
       if (action === 'next' || action === 'previous') {
         const link = direction > 0 ? nextLink : previousLink;
-        if (!link) return;
-        event.preventDefault();
+        if (!link) return false;
         link.click();
-        return;
+        return true;
       }
 
-      event.preventDefault();
       const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       window.scrollBy({
         top: direction * readerPageDistance(metrics),
         left: 0,
         behavior: reducedMotion ? 'auto' : 'smooth',
       });
+      return true;
+    };
+
+    const selectionIsActive = () => {
+      const selection = window.getSelection?.();
+      return Boolean(selection && !selection.isCollapsed && selection.toString().trim());
+    };
+
+    window.addEventListener('keydown', (event) => {
+      const direction = readerKeyDirection(event, {
+        dialogOpen: settingsDialog.open,
+        selectionActive: selectionIsActive(),
+      });
+      if (!direction || !moveReaderPage(direction)) return;
+      event.preventDefault();
     }, { signal });
+
+    let swipeStart = null;
+    const resetSwipe = () => {
+      swipeStart = null;
+    };
+    const touchByIdentifier = (touches, identifier) =>
+      Array.from(touches).find((touch) => touch.identifier === identifier);
+
+    app.querySelector('.reader-shell').addEventListener('touchstart', (event) => {
+      if (event.touches.length !== 1
+          || settingsDialog.open
+          || selectionIsActive()
+          || event.target.closest?.(SWIPE_BLOCKED_TARGETS)) {
+        resetSwipe();
+        return;
+      }
+      const touch = event.touches[0];
+      swipeStart = {
+        identifier: touch.identifier,
+        x: touch.clientX,
+        y: touch.clientY,
+        time: event.timeStamp,
+      };
+    }, { passive: true, signal });
+
+    app.querySelector('.reader-shell').addEventListener('touchmove', (event) => {
+      if (!swipeStart || event.touches.length !== 1) return;
+      const touch = touchByIdentifier(event.touches, swipeStart.identifier);
+      if (!touch) {
+        resetSwipe();
+        return;
+      }
+      const horizontal = Math.abs(touch.clientX - swipeStart.x);
+      const vertical = Math.abs(touch.clientY - swipeStart.y);
+      if (vertical >= 12 && vertical > horizontal) {
+        resetSwipe();
+        return;
+      }
+      if (horizontal >= 12 && horizontal > vertical * 1.15) {
+        event.preventDefault();
+      }
+    }, { passive: false, signal });
+
+    app.querySelector('.reader-shell').addEventListener('touchend', (event) => {
+      if (!swipeStart) return;
+      const start = swipeStart;
+      const touch = touchByIdentifier(event.changedTouches, start.identifier);
+      resetSwipe();
+      if (!touch || selectionIsActive()) return;
+      const direction = readerSwipeDirection(start, {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: event.timeStamp,
+      });
+      if (!direction || !moveReaderPage(direction)) return;
+      event.preventDefault();
+    }, { passive: false, signal });
+    app.querySelector('.reader-shell').addEventListener(
+      'touchcancel',
+      resetSwipe,
+      { passive: true, signal },
+    );
 
     let highestIndex = initialIndex;
     const blocks = [...content.querySelectorAll('.content-block')];
@@ -1030,7 +1149,11 @@ async function renderReader(
         }));
         const pageAtEnd = window.scrollY + window.innerHeight
           >= document.documentElement.scrollHeight - 4;
-        recordProgress(progressIndexAtViewport(items, window.innerHeight, pageAtEnd));
+        recordProgress(
+          pageAtEnd
+            ? section.blocks.length - 1
+            : progressIndexAtViewport(items, window.innerHeight, false),
+        );
       };
       const scheduleProgress = () => {
         if (!progressFrame) progressFrame = window.requestAnimationFrame(evaluateProgress);
@@ -1351,6 +1474,7 @@ async function renderRoute() {
 function lock({ broadcast = true } = {}) {
   renderVersion += 1;
   beginView();
+  void unlockSession.clear();
   repository.lock();
   app.replaceChildren();
   if (broadcast) lockChannel?.postMessage({ type: 'lock' });
@@ -1412,5 +1536,22 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   });
 }
 
-applySettings();
-renderUnlock();
+async function initialize() {
+  applySettings();
+  const sessionKey = await unlockSession.restore();
+  if (sessionKey) {
+    showLoading('서재를 다시 여는 중');
+    try {
+      await repository.restore(sessionKey);
+      setUnlockedChrome(true);
+      await renderRoute();
+      return;
+    } catch {
+      await unlockSession.clear();
+      repository.lock();
+    }
+  }
+  renderUnlock();
+}
+
+void initialize();

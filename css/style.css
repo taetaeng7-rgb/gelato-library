@@ -875,6 +875,14 @@ button[disabled] {
   margin-top: 1.2em;
 }
 
+.content-block[data-block-type="sourceAnchor"] {
+  margin-top: 0.55em;
+}
+
+.content-block[data-block-type="sourceAnchor"] + .content-block {
+  margin-top: 0.75em;
+}
+
 .content-block[data-highlighted="true"] {
   border-radius: 0.4rem;
   background: color-mix(in srgb, var(--warm-soft), transparent 20%);
@@ -887,7 +895,9 @@ button[disabled] {
 
 .reader-content h2,
 .reader-content h3,
-.reader-content h4 {
+.reader-content h4,
+.reader-content h5,
+.reader-content h6 {
   margin: 1.8em 0 0.65em;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   line-height: 1.35;
@@ -904,6 +914,15 @@ button[disabled] {
 
 .reader-content h4 {
   font-size: 1.06em;
+}
+
+.reader-content h5 {
+  font-size: 1em;
+}
+
+.reader-content h6 {
+  color: var(--muted);
+  font-size: 0.92em;
 }
 
 .reader-content ul,
@@ -924,21 +943,32 @@ button[disabled] {
 }
 
 .reader-content blockquote p,
-.reader-content figcaption,
 .reader-content .footnote {
   white-space: pre-line;
 }
 
-.reader-content figure {
-  margin: 1.6em 0;
-}
-
-.reader-content figcaption {
-  margin-top: 0.55em;
+.reader-content .visual-description {
+  margin: 0;
+  padding: 0.9em 1em;
+  border-left: 4px solid var(--warm);
+  border-radius: 0 0.65rem 0.65rem 0;
+  background: color-mix(in srgb, var(--warm-soft), transparent 52%);
   color: var(--muted);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  font-size: 0.78em;
-  line-height: 1.5;
+  font-size: 0.86em;
+  line-height: 1.65;
+}
+
+.reader-content .visual-description-label {
+  display: block;
+  margin-bottom: 0.35em;
+  color: var(--ink);
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+
+.reader-content .visual-description p {
+  white-space: pre-line;
 }
 
 .reader-content .footnote {
@@ -954,7 +984,8 @@ button[disabled] {
   display: block;
   color: var(--muted);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  font-size: 0.68em;
+  font-size: max(0.75rem, 0.7em);
+  line-height: 1.45;
   text-align: right;
 }
 
@@ -1003,7 +1034,7 @@ button[disabled] {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-.reader-content code {
+.reader-content :not(pre) > code {
   padding: 0.1em 0.25em;
   border-radius: 0.25rem;
   background: var(--accent-soft);
@@ -1013,9 +1044,18 @@ button[disabled] {
 .reader-content pre {
   overflow-x: auto;
   padding: 1rem;
+  border: 1px solid var(--line);
   border-radius: 0.6rem;
   background: var(--surface);
   font-size: 0.82em;
+  line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reader-content pre code {
+  padding: 0;
+  background: transparent;
+  font-size: inherit;
 }
 
 .reader-footer {
@@ -1064,6 +1104,23 @@ button[disabled] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 30rem) {
+  .reader-footer-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .reader-footer-nav > span:empty {
+    display: none;
+  }
+
+  .reader-footer-nav strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+  }
 }
 
 .bottom-nav {

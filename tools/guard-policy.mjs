@@ -23,6 +23,7 @@ const allowedExactPaths = new Set([
   'js/router.js',
   'js/sanitize.js',
   'js/store.js',
+  'js/unlock-session.js',
   'manifest.webmanifest',
   'package.json',
   'sw.js',
@@ -35,6 +36,7 @@ const allowedExactPaths = new Set([
   'test/router-store.test.mjs',
   'test/service-worker.test.mjs',
   'test/style.test.mjs',
+  'test/unlock-session.test.mjs',
   'tools/guard-policy.mjs',
   'tools/guard.mjs',
 ]);

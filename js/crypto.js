@@ -168,6 +168,18 @@ export async function deriveAesKey(password, salt, iterations) {
   );
 }
 
+export function isAesDecryptKey(key) {
+  return Boolean(
+    key
+    && typeof key === 'object'
+    && key.type === 'secret'
+    && key.extractable === false
+    && key.algorithm?.name === 'AES-GCM'
+    && key.algorithm?.length === 256
+    && Array.from(key.usages || []).includes('decrypt'),
+  );
+}
+
 async function decryptParsed(parsed, key) {
   try {
     const clearBytes = await globalThis.crypto.subtle.decrypt(
@@ -197,10 +209,24 @@ export class GelatoVault {
     return Boolean(this.#key);
   }
 
+  get sessionKey() {
+    return this.#key;
+  }
+
   async unlockCatalog(input, password) {
     const parsed = parseBundle(input);
     if (parsed.header.bundleId !== 'catalog') fail('UNEXPECTED_BUNDLE');
     const key = await deriveAesKey(password, parsed.salt, parsed.header.iterations);
+    const payload = await decryptParsed(parsed, key);
+    this.#key = key;
+    this.#salt = parsed.header.salt;
+    return payload;
+  }
+
+  async restoreCatalog(input, key) {
+    if (!isAesDecryptKey(key)) fail('INVALID_SESSION_KEY');
+    const parsed = parseBundle(input);
+    if (parsed.header.bundleId !== 'catalog') fail('UNEXPECTED_BUNDLE');
     const payload = await decryptParsed(parsed, key);
     this.#key = key;
     this.#salt = parsed.header.salt;

@@ -68,8 +68,15 @@ test('GELATOE2 canonical header를 파싱하고 AAD로 복호화한다', async (
   const vault = new GelatoVault();
   assert.deepEqual(await vault.unlockCatalog(bundle, 'correct horse battery staple'), payload);
   assert.equal(vault.unlocked, true);
+  assert.equal(vault.sessionKey.extractable, false);
+
+  const restoredVault = new GelatoVault();
+  assert.deepEqual(await restoredVault.restoreCatalog(bundle, vault.sessionKey), payload);
+  assert.equal(restoredVault.unlocked, true);
+
   vault.lock();
   assert.equal(vault.unlocked, false);
+  assert.equal(vault.sessionKey, null);
 });
 
 test('6자 비밀번호를 허용하고 5자는 거부한다', async () => {

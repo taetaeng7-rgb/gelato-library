@@ -101,3 +101,45 @@ test('설명형 인용문과 주석의 의미 있는 줄바꿈을 보존한다',
     /\.reader-content blockquote p,[\s\S]*?white-space:\s*pre-line/u,
   );
 });
+
+test('독자용 구분선을 그리지 않고 block 종류별 스타일 hook을 둔다', () => {
+  assert.doesNotMatch(appSource, /createElement\(['"]hr['"]\)/u);
+  assert.match(appSource, /wrapper\.dataset\.blockType\s*=\s*block\.type/u);
+  assert.match(
+    declarationBlock('.reader-content .source-anchor'),
+    /font-size:\s*max\(0\.75rem,\s*0\.7em\)/u,
+  );
+});
+
+test('block code는 균일한 배경과 키보드 스크롤 영역을 사용한다', () => {
+  assert.match(
+    declarationBlock('.reader-content pre code'),
+    /background:\s*transparent/u,
+  );
+  assert.match(
+    css,
+    /\.reader-content pre\s*\{[^}]*border:\s*1px solid var\(--line\)/u,
+  );
+  assert.match(appSource, /pre\.tabIndex\s*=\s*0/u);
+  assert.match(appSource, /pre\.setAttribute\('role',\s*'region'\)/u);
+});
+
+test('본문의 H5·H6 계층과 모바일 다음 절 제목을 보존한다', () => {
+  assert.match(appSource, /Math\.min\(6,\s*Math\.max\(2,/u);
+  assert.match(css, /\.reader-content h5\s*\{/u);
+  assert.match(css, /\.reader-content h6\s*\{/u);
+  assert.match(
+    css,
+    /@media \(max-width:\s*30rem\)[\s\S]*?\.reader-footer-nav\s*\{[\s\S]*?grid-template-columns:\s*1fr/u,
+  );
+  assert.match(css, /-webkit-line-clamp:\s*2/u);
+});
+
+test('시각 자료 설명은 일반 인용문과 구분된 접근성 영역이다', () => {
+  assert.match(appSource, /aside\.className\s*=\s*'visual-description'/u);
+  assert.match(appSource, /aside\.setAttribute\('aria-label',\s*'시각 자료 설명'\)/u);
+  assert.match(
+    declarationBlock('.reader-content .visual-description'),
+    /border-left:\s*4px solid var\(--warm\)/u,
+  );
+});

@@ -94,6 +94,7 @@ test('pipeline catalog와 chapter·supplement schema를 검증·절 단위로 �
         type: 'sourceAnchor',
         pdfPage: '1',
         printPage: null,
+        printLocator: '표제지 다음의 번호 없는 사진 지면',
         pageRole: null,
       },
       { id: 'b1', type: 'heading', level: 2, text: '첫 절', anchor: 'first' },
@@ -105,6 +106,10 @@ test('pipeline catalog와 chapter·supplement schema를 검증·절 단위로 �
   assert.equal(chapter.id, '01');
   assert.deepEqual(chapter.sections.map((section) => section.blocks.length), [3, 2]);
   assert.equal(chapter.sections[0].blocks[0].type, 'sourceAnchor');
+  assert.equal(
+    chapter.sections[0].blocks[0].printLocator,
+    '표제지 다음의 번호 없는 사진 지면',
+  );
 
   const supplement = validateSupplement({
     schemaVersion: 2,

@@ -135,6 +135,28 @@ test('읽지 않는 목차 그룹을 진도에서 제외하고 기존 본문 진
   ), 0);
 });
 
+test('본문 block 수가 바뀌면 기존 진도 비율을 새 payload에 맞춘다', () => {
+  const store = createStore(memoryStorage());
+  store.setSectionProgress('corvitto', 'chapter', '04', '계산법', 4, 10, 1);
+  store.reconcileReaderSections(
+    'corvitto',
+    'chapter',
+    '04',
+    [{ id: '계산법', totalBlocks: 8 }],
+  );
+  const section = getTargetProgress(
+    store.get().progress,
+    'corvitto',
+    'chapter',
+    '04',
+  ).sections['계산법'];
+  assert.deepEqual(section, {
+    blockIndex: 3,
+    totalBlocks: 8,
+    complete: false,
+  });
+});
+
 test('글자 크기와 테마 허용값만 보존한다', () => {
   const storage = memoryStorage();
   const store = createStore(storage);

@@ -47,6 +47,39 @@ export function readerKeyDirection(
   return 0;
 }
 
+export function readerSwipeDirection(
+  start,
+  end,
+  {
+    minDistance = 56,
+    maxDuration = 700,
+    axisRatio = 1.25,
+  } = {},
+) {
+  const values = [
+    start?.x,
+    start?.y,
+    start?.time,
+    end?.x,
+    end?.y,
+    end?.time,
+  ];
+  if (values.some((value) => !Number.isFinite(value))) return 0;
+
+  const duration = end.time - start.time;
+  if (duration < 0 || duration > nonNegativeNumber(maxDuration)) return 0;
+
+  const horizontal = end.x - start.x;
+  const vertical = end.y - start.y;
+  const requiredDistance = nonNegativeNumber(minDistance);
+  const requiredRatio = Math.max(1, nonNegativeNumber(axisRatio));
+  if (Math.abs(horizontal) < requiredDistance
+      || Math.abs(horizontal) < Math.abs(vertical) * requiredRatio) {
+    return 0;
+  }
+  return horizontal < 0 ? 1 : -1;
+}
+
 export function readerPageAction(
   direction,
   {
