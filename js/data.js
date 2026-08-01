@@ -204,13 +204,22 @@ export function validateCatalog(catalog) {
   return catalog;
 }
 
+// 원문 종류. `guide-document`는 원본 PDF가 없는 문서 컬렉션이라
+// pdfPages·printPages·segmentCount 키를 아예 갖지 않는다.
+const SOURCE_TYPES = new Set([
+  'source-chapter',
+  'editorial-page-range',
+  'source-supplement',
+  'guide-document',
+]);
+
 function validateSource(source, errorCode) {
   const pagesAreSafe = (pages) => pages == null
     || (Array.isArray(pages)
       && pages.length <= 10_000
       && pages.every((page) => Number.isInteger(page) || safeText(page, 100)));
   if (!source || typeof source !== 'object' || Array.isArray(source)
-      || !['source-chapter', 'editorial-page-range', 'source-supplement'].includes(source.type)
+      || !SOURCE_TYPES.has(source.type)
       || !Array.isArray(source.files)
       || source.files.length < 1
       || source.files.length > 1_000

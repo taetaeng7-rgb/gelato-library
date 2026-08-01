@@ -172,3 +172,97 @@ test('검색 색인의 chapter·supplement 위치와 null section을 확인한�
     ],
   );
 });
+
+test('문서 컬렉션의 guide-document payload를 검증한다', () => {
+  // 원본 PDF가 없는 문서 컬렉션. pdfPages·printPages·segmentCount 키가 아예 없다.
+  const payload = {
+    schemaVersion: 2,
+    kind: 'chapter',
+    bundleId: 'ai:chapter:03',
+    bookId: 'ai',
+    chapterId: '03',
+    number: 3,
+    title: 'AI 활용 현단계 실행계획',
+    description: '게이트가 열리지 않는 기간의 AI 활용 범위를 정합니다.',
+    source: {
+      type: 'guide-document',
+      files: ['guides/startup/08_AI_활용_현단계_실행계획.md'],
+    },
+    contentDigest: digest,
+    stats: { blockCount: 4, sectionCount: 2, searchableCharacterCount: 30 },
+    sections: [
+      { id: '문서-제목', title: '문서 제목', level: 1, blockId: 'b0' },
+      { id: '네-트랙', title: '네 트랙', level: 2, blockId: 'b2' },
+    ],
+    blocks: [
+      { id: 'b0', type: 'heading', level: 1, text: '문서 제목', anchor: '문서-제목' },
+      { id: 'b1', type: 'paragraph', text: '현 단계 범위를 좁힌다.' },
+      { id: 'b2', type: 'heading', level: 2, text: '네 트랙', anchor: '네-트랙' },
+      {
+        id: 'b3',
+        type: 'table',
+        head: ['트랙', '선결조건'],
+        align: ['left', 'left'],
+        rows: [['교재 학습', '없음']],
+      },
+    ],
+  };
+
+  const chapter = validateChapter(structuredClone(payload), 'ai', '03');
+  assert.equal(chapter.targetKind, 'chapter');
+  assert.equal(chapter.source.type, 'guide-document');
+  assert.equal(Object.hasOwn(chapter.source, 'pdfPages'), false);
+  assert.equal(chapter.sections.length, 2);
+  assert.equal(chapter.sections[0].blocks.length, 2);
+  assert.equal(chapter.sections[1].blocks.at(-1).type, 'table');
+
+  // 모르는 원문 종류는 계속 거부해야 한다.
+  const unknown = structuredClone(payload);
+  unknown.source.type = 'made-up-source';
+  assert.throws(
+    () => validateChapter(unknown, 'ai', '03'),
+    (error) => error.code === 'BAD_CHAPTER',
+  );
+});
+
+test('세 번째 컬렉션이 있는 catalog를 받아들인다', () => {
+  const book = (id, title) => ({
+    id,
+    title,
+    subtitle: '부제',
+    authors: [],
+    language: 'ko',
+    chapterType: 'editorial',
+    chapterCount: 1,
+    searchBundleId: `${id}:search`,
+    searchBundlePath: `search/${id}.enc`,
+    chapters: [{
+      id: '01',
+      number: 1,
+      title: '문서',
+      description: '',
+      bundleId: `${id}:chapter:01`,
+      bundlePath: `books/${id}/chapters/01.enc`,
+      contentDigest: digest,
+      stats,
+    }],
+    supplements: [],
+  });
+  const catalog = {
+    schemaVersion: 2,
+    kind: 'catalog',
+    bundleId: 'catalog',
+    library: { id: 'gelato', title: '서재', language: 'ko' },
+    books: [book('goff', '아이스크림'), book('corvitto', '젤라토'), book('ai', 'AI 활용')],
+  };
+  const validated = validateCatalog(structuredClone(catalog));
+  assert.equal(validated.books.length, 3);
+
+  const empty = structuredClone(catalog);
+  empty.books = [];
+  assert.throws(
+    () => validateCatalog(empty),
+    (error) => error.code === 'BAD_CATALOG',
+  );
+});
+
