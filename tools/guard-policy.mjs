@@ -42,8 +42,8 @@ const allowedExactPaths = new Set([
 ]);
 const allowedPathPatterns = [
   /^data\/catalog\.enc$/u,
-  /^data\/search\/(?:corvitto|goff|ai)\.enc$/u,
-  /^data\/books\/(?:corvitto|goff|ai)\/chapters\/\d{2}\.enc$/u,
+  /^data\/search\/(?:corvitto|goff|practice)\.enc$/u,
+  /^data\/books\/(?:corvitto|goff|practice)\/chapters\/\d{2}\.enc$/u,
   /^data\/books\/goff\/supplements\/(?:frontmatter|index)\.enc$/u,
 ];
 const plaintextCandidateExtensions = new Set([

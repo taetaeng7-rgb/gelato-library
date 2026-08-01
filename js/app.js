@@ -268,7 +268,7 @@ function targetDetailRoute(bookId, targetKind, targetId, blockId = null) {
 }
 
 // 문서 모음(장이 아닌 컬렉션)에는 "N장"이 아니라 "문서 N"을 쓴다.
-const DOCUMENT_COLLECTION_IDS = new Set(['ai']);
+const DOCUMENT_COLLECTION_IDS = new Set(['practice']);
 
 function isDocumentCollection(bookId) {
   return DOCUMENT_COLLECTION_IDS.has(bookId);

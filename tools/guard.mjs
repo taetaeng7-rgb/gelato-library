@@ -7,8 +7,10 @@ import { parseBundle } from '../js/crypto.js';
 import { publicPathViolation } from './guard-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// catalog 1 + goff 18 + corvitto 17 + ai 4
-const EXPECTED_BUNDLE_COUNT = 40;
+// catalog 1 + goff 18 + corvitto 17 + practice 3
+// 컬렉션을 추가·제거하는 커밋에서 data/ 재빌드와 함께 고친다.
+// 이 리터럴은 "상수만 고치고 재빌드를 잊으면 빨간불"이 되는 발행 트립와이어다.
+const EXPECTED_BUNDLE_COUNT = 39;
 
 async function filesBelow(directory) {
   const results = [];
