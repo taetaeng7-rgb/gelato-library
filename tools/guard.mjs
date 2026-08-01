@@ -7,10 +7,8 @@ import { parseBundle } from '../js/crypto.js';
 import { publicPathViolation } from './guard-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// data/를 재빌드하는 커밋에서 40으로 올린다.
-// (catalog 1 + goff 18 + corvitto 17 + ai 4 = 40)
-// 재빌드는 소유자 비밀번호가 있어야 하므로, 그 전에 값을 올리면 이 검사가 실패한다.
-const EXPECTED_BUNDLE_COUNT = 36;
+// catalog 1 + goff 18 + corvitto 17 + ai 4
+const EXPECTED_BUNDLE_COUNT = 40;
 
 async function filesBelow(directory) {
   const results = [];
