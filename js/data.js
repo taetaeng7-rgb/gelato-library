@@ -183,7 +183,8 @@ export function validateCatalog(catalog) {
       || !safeText(catalog.library.title, 500)
       || !safeText(catalog.library.language, 40)
       || !Array.isArray(catalog.books)
-      || catalog.books.length !== 2) {
+      || catalog.books.length < 1
+      || catalog.books.length > 20) {
     fail('BAD_CATALOG');
   }
   const bookIds = new Set();

@@ -267,8 +267,17 @@ function targetDetailRoute(bookId, targetKind, targetId, blockId = null) {
   return routes.target(bookId, targetKind, targetId, blockId);
 }
 
-function targetKicker(target) {
-  if (target.targetKind === 'chapter') return `${target.number}장`;
+// 문서 모음(장이 아닌 컬렉션)에는 "N장"이 아니라 "문서 N"을 쓴다.
+const DOCUMENT_COLLECTION_IDS = new Set(['ai']);
+
+function isDocumentCollection(bookId) {
+  return DOCUMENT_COLLECTION_IDS.has(bookId);
+}
+
+function targetKicker(target, bookId) {
+  if (target.targetKind === 'chapter') {
+    return isDocumentCollection(bookId) ? `문서 ${target.number}` : `${target.number}장`;
+  }
   return target.role === 'index' ? '찾아보기' : '책 앞부분';
 }
 
@@ -395,7 +404,7 @@ function renderBook(bookId) {
       </header>
       ${supplementList('before', '책을 읽기 전에')}
       <section aria-labelledby="chapter-list-title">
-        <h2 id="chapter-list-title">챕터</h2>
+        <h2 id="chapter-list-title">${isDocumentCollection(book.id) ? '문서' : '챕터'}</h2>
       <ol class="chapter-list">
         ${book.chapters.map((chapter) => {
           const percent = chapterProgressPercent(
@@ -407,7 +416,7 @@ function renderBook(bookId) {
               <div>
                 <h3><a href="${routes.chapter(book.id, chapter.id)}">${escapeHtml(chapter.title)}</a></h3>
                 ${chapter.description ? `<p>${escapeHtml(chapter.description)}</p>` : ''}
-                ${progressMarkup(percent, '챕터 진도')}
+                ${progressMarkup(percent, isDocumentCollection(book.id) ? '문서 진도' : '챕터 진도')}
               </div>
             </li>`;
         }).join('')}
@@ -501,10 +510,15 @@ async function renderContentDetail(
           <span aria-current="page">${escapeHtml(summary.title)}</span>
         </nav>
         <article class="chapter-summary">
-          <p class="eyebrow">${escapeHtml(targetKicker({ ...content, targetKind }))}</p>
+          <p class="eyebrow">${escapeHtml(targetKicker({ ...content, targetKind }, bookId))}</p>
           <h1>${escapeHtml(content.title)}</h1>
           ${content.description ? `<p>${escapeHtml(content.description)}</p>` : ''}
-          ${progressMarkup(percent, targetKind === 'chapter' ? '챕터 진도' : '자료 진도')}
+          ${progressMarkup(
+            percent,
+            targetKind === 'chapter'
+              ? (isDocumentCollection(bookId) ? '문서 진도' : '챕터 진도')
+              : '자료 진도',
+          )}
           <div class="chapter-actions">
             <a class="primary-button" href="${routes.reader(
               bookId,
@@ -924,7 +938,7 @@ async function renderReader(
           <p class="reader-kicker">${escapeHtml(targetKicker({
             ...targetContent,
             targetKind,
-          }))} · ${sectionIndex + 1}/${readableSections.length}절</p>
+          }, bookId))} · ${sectionIndex + 1}/${readableSections.length}절</p>
           <h1>${escapeHtml(section.title)}</h1>
           <div class="reader-tools">
             <div class="reader-progress">${progressMarkup(

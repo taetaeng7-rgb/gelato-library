@@ -75,6 +75,7 @@ test('확장자 우회명과 확장자 없는 평문 후보도 exact allowlist�
 
 test('현재 공개 산출물 74개는 exact allowlist와 일치한다', async () => {
   const files = await filesBelow(root);
+  // data/ 재빌드 커밋에서 78로 올린다 (bundle 36 → 40).
   assert.equal(files.length, 74);
   assert.deepEqual(
     files
