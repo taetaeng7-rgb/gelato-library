@@ -143,3 +143,38 @@ test('시각 자료 설명은 일반 인용문과 구분된 접근성 영역이�
     /border-left:\s*4px solid var\(--warm\)/u,
   );
 });
+
+test('표는 열 수에 따라 적응하고 열 제목·행 레이블을 고정한다', () => {
+  const table = declarationBlock('.reader-content table');
+  assert.match(table, /min-width:\s*100%/u, '표 전체에 고정 최소폭을 두면 항상 스크롤한다.');
+  assert.match(table, /border-collapse:\s*separate/u, 'sticky 셀이 경계선을 잃지 않으려면 collapse를 쓰지 않는다.');
+
+  const cell = declarationBlock('.reader-content th,\n.reader-content td');
+  assert.match(cell, /min-width:\s*7em/u, '열당 최소폭이 em이어야 리더 글자 크기에 따라 넓어진다.');
+  assert.match(cell, /white-space:\s*pre-line/u, '셀 안의 줄바꿈을 공백으로 접지 않는다.');
+
+  assert.match(declarationBlock('.reader-content thead th'), /position:\s*sticky/u);
+  const headFirst = declarationBlock('.reader-content thead th:first-child');
+  assert.match(headFirst, /left:\s*0/u, '머리행 첫 칸은 가로로도 고정해야 열 이름이 어긋나지 않는다.');
+
+  const bodyFirst = declarationBlock(
+    '.reader-content tbody th:first-child,\n.reader-content tbody td:first-child',
+  );
+  assert.match(bodyFirst, /position:\s*sticky/u);
+  assert.match(bodyFirst, /left:\s*0/u);
+  assert.match(bodyFirst, /background:/u, '고정된 셀은 배경이 있어야 아래 내용이 비치지 않는다.');
+});
+
+test('표 스크롤 영역에 가로 스크롤 어포던스가 있다', () => {
+  const scroll = declarationBlock('.reader-content .table-scroll');
+  assert.match(scroll, /overflow-x:\s*auto/u);
+  assert.match(scroll, /linear-gradient/u, 'iOS는 스크롤바를 숨기므로 시각 신호가 필요하다.');
+  assert.match(scroll, /background-attachment:\s*local/u, '끝까지 스크롤하면 신호가 사라져야 한다.');
+});
+
+test('인쇄에서는 표를 자르지 않는다', () => {
+  const printBlock = css.match(/@media print\s*\{([\s\S]*?)\n\}/u)?.[1] || '';
+  assert.match(printBlock, /\.table-scroll[\s\S]*?overflow:\s*visible/u);
+  assert.match(printBlock, /position:\s*static/u, '인쇄에서는 sticky를 해제한다.');
+});
+

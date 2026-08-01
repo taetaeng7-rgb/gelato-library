@@ -1000,16 +1000,29 @@ button[disabled] {
 .reader-content .table-scroll {
   max-width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 80vh;
   margin: 1.4em 0;
   border: 1px solid var(--line);
   border-radius: 0.7rem;
   -webkit-overflow-scrolling: touch;
+  /* 오른쪽에 더 볼 내용이 있다는 신호. iOS는 스크롤바를 숨기므로 이 그라디언트가
+     유일한 어포던스다. background-attachment: local이 끝까지 스크롤하면 사라지게 한다. */
+  background-image: linear-gradient(to left, var(--surface), rgb(0 0 0 / 0%) 2.5rem);
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 2.5rem 100%;
+  background-attachment: local;
 }
 
 .reader-content table {
   width: 100%;
-  min-width: 32rem;
-  border-collapse: collapse;
+  /* 표 전체에 고정 최소폭을 주지 않는다. 대신 아래에서 셀마다 최소폭을 주어
+     열이 적은 표는 화면에 맞고, 열이 많은 표만 가로 스크롤이 생기게 한다. */
+  min-width: 100%;
+  /* sticky 셀이 경계선을 잃지 않도록 collapse를 쓰지 않는다. */
+  border-collapse: separate;
+  border-spacing: 0;
   background: var(--surface);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   font-size: 0.82em;
@@ -1023,9 +1036,41 @@ button[disabled] {
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
+  /* 셀 안의 의도된 줄바꿈을 공백으로 접지 않는다. */
+  white-space: pre-line;
+  /* 좁은 셀에서 어절 유지가 과하게 길어지는 것을 완화한다. */
+  word-break: break-word;
+  /* 열당 최소폭. em이므로 리더 글자 크기를 키우면 함께 넓어진다.
+     2~3열 표는 화면 폭에 들어가고, 5열 표는 이 값의 합이 화면을 넘어
+     가로 스크롤이 생기면서 각 열의 가독 폭이 유지된다. */
+  min-width: 7em;
 }
 
 .reader-content th {
+  background: var(--accent-soft);
+}
+
+/* 열 제목을 고정한다. 세로로 긴 표에서 무엇을 보고 있는지 잃지 않게 한다. */
+.reader-content thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* 행 레이블을 고정한다. 가로로 스크롤해도 어느 행인지 알 수 있게 한다. */
+.reader-content tbody th:first-child,
+.reader-content tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+
+/* 머리행 첫 칸은 세로·가로 양쪽으로 고정해야 한다.
+   left를 빼면 가로 스크롤 시 머리행 첫 칸만 밀려 열 이름이 어긋난다. */
+.reader-content thead th:first-child {
+  left: 0;
+  z-index: 3;
   background: var(--accent-soft);
 }
 
@@ -1527,5 +1572,22 @@ button[disabled] {
     width: 100%;
     max-width: none;
     padding: 0;
+  }
+
+  /* 인쇄에서는 표를 자르지 않는다. */
+  .reader-content .table-scroll {
+    overflow: visible;
+    max-height: none;
+    background-image: none;
+  }
+
+  .reader-content table {
+    min-width: 0;
+  }
+
+  .reader-content thead th,
+  .reader-content tbody th:first-child,
+  .reader-content tbody td:first-child {
+    position: static;
   }
 }

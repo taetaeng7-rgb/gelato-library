@@ -133,7 +133,7 @@ test('새 service worker가 제어권을 얻으면 한 번만 reload한다', () 
 });
 
 test('읽기 이동과 잠금 세션 모듈을 최신 앱 셸에 포함한다', () => {
-  assert.match(swSource, /gelato-library-app-v8/u);
+  assert.match(swSource, /gelato-library-app-v9/u);
   assert.match(swSource, /\.\/js\/reader-navigation\.js/u);
   assert.match(swSource, /\.\/js\/unlock-session\.js/u);
 });
